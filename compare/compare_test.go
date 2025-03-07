@@ -1,9 +1,18 @@
-package comparing_structs_for_changes
+package compare
 
 import (
 	"strings"
 	"testing"
 )
+
+type Person struct {
+	Name     string
+	Age      int
+	Active   bool
+	Address  string
+	Children []string
+	Manager  *Person
+}
 
 func TestCompareStructsDetectsModifiedValues(t *testing.T) {
 	old := Person{

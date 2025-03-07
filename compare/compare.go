@@ -1,4 +1,4 @@
-package comparing_structs_for_changes
+package compare
 
 import (
 	"encoding/json"

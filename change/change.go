@@ -1,12 +1,13 @@
-package comparing_structs_for_changes
+package change
 
 import (
 	"fmt"
+	"github.com/rschoonheim/go-struct-sync/compare"
 	"reflect"
 )
 
 // ApplyChanges applies a list of changes to the original struct and returns a modified copy
-func ApplyChanges(original interface{}, changes []Change) (interface{}, error) {
+func ApplyChanges(original interface{}, changes []compare.Change) (interface{}, error) {
 	// Extract and validate original value
 	originalVal := reflect.ValueOf(original)
 	isPointer := originalVal.Kind() == reflect.Ptr
@@ -51,10 +52,10 @@ func ApplyChanges(original interface{}, changes []Change) (interface{}, error) {
 		}
 
 		switch change.ChangeType {
-		case Deleted:
+		case compare.Deleted:
 			// Set zero value for deleted fields
 			field.Set(reflect.Zero(field.Type()))
-		case Modified, Added:
+		case compare.Modified, compare.Added:
 			// Fast path for nil values
 			if change.NewValue == nil {
 				if field.Kind() == reflect.Ptr || field.Kind() == reflect.Interface ||

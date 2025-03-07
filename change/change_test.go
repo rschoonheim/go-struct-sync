@@ -1,6 +1,7 @@
-package comparing_structs_for_changes
+package change
 
 import (
+	"github.com/rschoonheim/go-struct-sync/compare"
 	"reflect"
 	"testing"
 )
@@ -24,10 +25,10 @@ func TestApplyChangesModifiesValues(t *testing.T) {
 		Address: "123 Main St",
 	}
 
-	changes := []Change{
-		{Field: "Name", ChangeType: Modified, NewValue: "Jane"},
-		{Field: "Age", ChangeType: Modified, NewValue: 31},
-		{Field: "Active", ChangeType: Modified, NewValue: false},
+	changes := []compare.Change{
+		{Field: "Name", ChangeType: compare.Modified, NewValue: "Jane"},
+		{Field: "Age", ChangeType: compare.Modified, NewValue: 31},
+		{Field: "Active", ChangeType: compare.Modified, NewValue: false},
 	}
 
 	result, err := ApplyChanges(original, changes)
@@ -50,8 +51,8 @@ func TestApplyChangesToPointer(t *testing.T) {
 		Age:  30,
 	}
 
-	changes := []Change{
-		{Field: "Name", ChangeType: Modified, NewValue: "Jane"},
+	changes := []compare.Change{
+		{Field: "Name", ChangeType: compare.Modified, NewValue: "Jane"},
 	}
 
 	result, err := ApplyChanges(original, changes)
@@ -61,7 +62,7 @@ func TestApplyChangesToPointer(t *testing.T) {
 
 	modified := result.(*Person)
 	if modified.Name != "Jane" || modified.Age != 30 {
-		t.Errorf("Expected only Name to be modified, got: %+v", modified)
+		t.Errorf("Expected only Name to be compare.Modified, got: %+v", modified)
 	}
 }
 
@@ -73,10 +74,10 @@ func TestApplyChangesDeletesFields(t *testing.T) {
 		Manager:  &Person{Name: "Boss"},
 	}
 
-	changes := []Change{
-		{Field: "Name", ChangeType: Deleted, OldValue: "John"},
-		{Field: "Children", ChangeType: Deleted, OldValue: []string{"Alice", "Bob"}},
-		{Field: "Manager", ChangeType: Deleted, OldValue: &Person{Name: "Boss"}},
+	changes := []compare.Change{
+		{Field: "Name", ChangeType: compare.Deleted, OldValue: "John"},
+		{Field: "Children", ChangeType: compare.Deleted, OldValue: []string{"Alice", "Bob"}},
+		{Field: "Manager", ChangeType: compare.Deleted, OldValue: &Person{Name: "Boss"}},
 	}
 
 	result, err := ApplyChanges(original, changes)
@@ -101,10 +102,10 @@ func TestApplyChangesAddsValues(t *testing.T) {
 		Name: "John",
 	}
 
-	changes := []Change{
-		{Field: "Age", ChangeType: Added, NewValue: 25},
-		{Field: "Active", ChangeType: Added, NewValue: true},
-		{Field: "Children", ChangeType: Added, NewValue: []string{"Child"}},
+	changes := []compare.Change{
+		{Field: "Age", ChangeType: compare.Added, NewValue: 25},
+		{Field: "Active", ChangeType: compare.Added, NewValue: true},
+		{Field: "Children", ChangeType: compare.Added, NewValue: []string{"Child"}},
 	}
 
 	result, err := ApplyChanges(original, changes)
@@ -123,7 +124,7 @@ func TestApplyChangesAddsValues(t *testing.T) {
 
 func TestApplyChangesWithEmptyChangesList(t *testing.T) {
 	original := Person{Name: "John", Age: 30}
-	changes := []Change{}
+	changes := []compare.Change{}
 
 	result, err := ApplyChanges(original, changes)
 	if err != nil {
@@ -138,8 +139,8 @@ func TestApplyChangesWithEmptyChangesList(t *testing.T) {
 
 func TestApplyChangesFailsOnNonStruct(t *testing.T) {
 	original := "not a struct"
-	changes := []Change{
-		{Field: "something", ChangeType: Modified, NewValue: "new"},
+	changes := []compare.Change{
+		{Field: "something", ChangeType: compare.Modified, NewValue: "new"},
 	}
 
 	_, err := ApplyChanges(original, changes)
@@ -150,8 +151,8 @@ func TestApplyChangesFailsOnNonStruct(t *testing.T) {
 
 func TestApplyChangesFailsOnNonExistentField(t *testing.T) {
 	original := Person{Name: "John"}
-	changes := []Change{
-		{Field: "NonExistentField", ChangeType: Modified, NewValue: "value"},
+	changes := []compare.Change{
+		{Field: "NonExistentField", ChangeType: compare.Modified, NewValue: "value"},
 	}
 
 	_, err := ApplyChanges(original, changes)
@@ -162,8 +163,8 @@ func TestApplyChangesFailsOnNonExistentField(t *testing.T) {
 
 func TestApplyChangesFailsOnUnexportedField(t *testing.T) {
 	original := Person{Name: "John"}
-	changes := []Change{
-		{Field: "private", ChangeType: Modified, NewValue: "value"},
+	changes := []compare.Change{
+		{Field: "private", ChangeType: compare.Modified, NewValue: "value"},
 	}
 
 	_, err := ApplyChanges(original, changes)
@@ -174,8 +175,8 @@ func TestApplyChangesFailsOnUnexportedField(t *testing.T) {
 
 func TestApplyChangesFailsOnTypeConversionError(t *testing.T) {
 	original := Person{Name: "John"}
-	changes := []Change{
-		{Field: "Name", ChangeType: Modified, NewValue: struct{}{}},
+	changes := []compare.Change{
+		{Field: "Name", ChangeType: compare.Modified, NewValue: struct{}{}},
 	}
 
 	_, err := ApplyChanges(original, changes)
